@@ -1,70 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../bloc/product_bloc.dart';
 import '../bloc/product_state.dart';
 import '../model/product.dart';
 
+class HomeScreen extends StatelessWidget {
+  final bool isDarkMode;
+  final VoidCallback toggleTheme;
 
-class HomeScreen extends StatefulWidget {
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
-  bool isDarkMode = false;
-
-  final List<Widget> _pages = [
-    ProductListScreen(),
-    ComingSoonScreen(),
-    ComingSoonScreen(),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  void _toggleTheme() {
-    setState(() {
-      isDarkMode = !isDarkMode;
-    });
-  }
+  HomeScreen({required this.isDarkMode, required this.toggleTheme});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      darkTheme: ThemeData.dark(),
-      theme: ThemeData.light(),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text("E-Shop"),
-          leading: Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Icon(Icons.menu),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "E-Shop",
+          style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold),
+        ),
+        leading: Padding(
+          padding: EdgeInsets.all(8.0),
+          child: Icon(Icons.menu),
+        ),
+        actions: [
+          IconButton(icon: Icon(Icons.search), onPressed: () {}),
+          IconButton(
+            icon: Icon(isDarkMode ? Icons.dark_mode : Icons.light_mode),
+            onPressed: toggleTheme, // Toggle dark mode globally
           ),
-          actions: [
-            IconButton(icon: Icon(Icons.search), onPressed: () {}),
-            IconButton(
-              icon: Icon(isDarkMode ? Icons.dark_mode : Icons.light_mode),
-              onPressed: _toggleTheme,
-            ),
-          ],
-        ),
-        body: _pages[_selectedIndex],
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-          items: [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.category), label: 'Categories'),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
-          ],
-        ),
+        ],
       ),
+      body: ProductListScreen(),
     );
   }
 }
@@ -120,7 +87,7 @@ class ProductCard extends StatelessWidget {
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-                  child: Image.network(product.image, width: double.infinity, fit: BoxFit.cover),
+                  child: Image.network(product.image, width: double.infinity, fit: BoxFit.contain),
                 ),
               ),
               Padding(
@@ -132,19 +99,22 @@ class ProductCard extends StatelessWidget {
                       product.title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 4),
                     Text(
                       product.category.toUpperCase(),
-                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                      style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey),
                     ),
                     SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.star, color: Colors.amber, size: 16),
+                        Icon(Icons.star, color: Colors.amber, size: 18),
                         SizedBox(width: 4),
-                        Text("${product.rating.rate}"),
+                        Text(
+                          "${product.rating.rate}",
+                          style: GoogleFonts.poppins(fontSize: 14),
+                        ),
                       ],
                     ),
                     SizedBox(height: 6),
@@ -156,19 +126,23 @@ class ProductCard extends StatelessWidget {
                           children: [
                             Text(
                               "\$${(product.price * 1.2).toStringAsFixed(2)}",
-                              style: TextStyle(
-                                  decoration: TextDecoration.lineThrough,
-                                  color: Colors.red,
-                                  fontSize: 12),
+                              style: GoogleFonts.poppins(
+                                fontSize: 12,
+                                decoration: TextDecoration.lineThrough,
+                                color: Colors.red,
+                              ),
                             ),
                             SizedBox(width: 5),
                             Text(
                               "\$${product.price}",
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold),
                             ),
                           ],
                         )
-                            : Text("\$${product.price}", style: TextStyle(fontWeight: FontWeight.bold)),
+                            : Text(
+                          "\$${product.price}",
+                          style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
                         IconButton(
                           icon: Icon(Icons.add_shopping_cart, color: Colors.blue),
                           onPressed: () {},
@@ -194,21 +168,12 @@ class ProductCard extends StatelessWidget {
                 decoration: BoxDecoration(color: Colors.red, borderRadius: BorderRadius.circular(4)),
                 child: Text(
                   "SALE",
-                  style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
         ],
       ),
-    );
-  }
-}
-
-class ComingSoonScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Lottie.asset('assets/coming_soon.json'),
     );
   }
 }

@@ -1,43 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lottie/lottie.dart';
 import 'bloc/product_bloc.dart';
 import 'bloc/product_event.dart';
-import 'bloc/product_state.dart';
-
+import 'screens/home_screen.dart';
+import 'screens/category_screen.dart';
+import 'screens/profile_screen.dart';
 
 void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool isDarkMode = false; // Global dark mode state
+
+  void _toggleTheme() {
+    setState(() {
+      isDarkMode = !isDarkMode;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData.light(),
-      darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.system,
-      home: BlocProvider(
-        create: (context) => ProductBloc()..add(FetchProducts()),
-        child: HomeScreen(),
+    return BlocProvider(
+      create: (context) => ProductBloc()..add(FetchProducts()),
+      child: MaterialApp(
+        theme: ThemeData.light(),
+        darkTheme: ThemeData.dark(),
+        themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light, // Apply dark mode globally
+        home: MainScreen(
+          isDarkMode: isDarkMode,
+          toggleTheme: _toggleTheme,
+        ),
       ),
     );
   }
 }
 
-class HomeScreen extends StatefulWidget {
+class MainScreen extends StatefulWidget {
+  final bool isDarkMode;
+  final VoidCallback toggleTheme;
+
+  MainScreen({required this.isDarkMode, required this.toggleTheme});
+
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  _MainScreenState createState() => _MainScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [
-    ProductListScreen(),
-    ComingSoonScreen(), // Category Page
-    ComingSoonScreen(), // Profile Page
-  ];
+  late List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      HomeScreen(isDarkMode: widget.isDarkMode, toggleTheme: widget.toggleTheme),
+      CategoryScreen(isDarkMode: widget.isDarkMode, toggleTheme: widget.toggleTheme),
+      ProfileScreen(isDarkMode: widget.isDarkMode, toggleTheme: widget.toggleTheme),
+    ];
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -48,53 +75,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Fake Store')),
-      body: _pages[_selectedIndex],
+      body: _pages[_selectedIndex], // Only one screen is displayed at a time
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.category), label: 'Category'),
+          BottomNavigationBarItem(icon: Icon(Icons.category), label: 'Categories'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
-    );
-  }
-}
-
-class ProductListScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<ProductBloc, ProductState>(
-      builder: (context, state) {
-        if (state is ProductLoading) {
-          return Center(child: CircularProgressIndicator());
-        } else if (state is ProductLoaded) {
-          return ListView.builder(
-            itemCount: state.products.length,
-            itemBuilder: (context, index) {
-              final product = state.products[index];
-              return ListTile(
-                leading: Image.network(product.image, width: 50, height: 50),
-                title: Text(product.title),
-                subtitle: Text('\$${product.price.toString()}'),
-              );
-            },
-          );
-        } else {
-          return Center(child: Text('Error loading products'));
-        }
-      },
-    );
-  }
-}
-
-class ComingSoonScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Lottie.asset('assets/coming_soon.json'), // Use the animation file
     );
   }
 }
